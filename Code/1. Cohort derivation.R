@@ -28,7 +28,7 @@ source("~/Code/Functions eGFR equations.R")
 ### Initial inclusion ##########################################################
 ################################################################################
 
-# include patients with Cystatin C after 2011
+# include patients with outpatient Cystatin C after 2011
 cystatinc <- lab_values |> 
   dplyr::filter(test == "cystC") |>  
   dplyr::filter(ip == 0) |>
@@ -42,7 +42,7 @@ cystatinc_2011 <- cystatinc |>
 ### Creatinine and Cystatin C measurements #####################################
 ################################################################################
 
-# collect outpatient creatinine
+# collect creatinine values
 creatinine <- lab_values |>  
   dplyr::filter(test == "crea") |> 
   dplyr::mutate(datum = as.Date(datum, format = "%Y-%m-%d")) |> 
@@ -244,4 +244,5 @@ sum(cohort$new_rrt == 1, na.rm = TRUE)
 # save final cohort
 
 save(cohort, file = "cohort.RData")
+
 
