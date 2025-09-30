@@ -537,7 +537,7 @@ egfr_plot <- ggplot2::ggplot(cohort_egfr_long,
   ggplot2::theme_minimal(base_size = 12) +  
   ggplot2::theme(panel.spacing = ggplot2::unit(1.5, "lines"), 
                  axis.text.y = ggplot2::element_text(size = 10)) +
-  ggplot2::theme(plot.margin = margin(20, 10, 20, 10)) # Expands top/bottom margins
+  ggplot2::theme(plot.margin = ggplot2::margin(20, 10, 20, 10)) # Expands top/bottom margins
 ggplot2::ggsave(filename = "eGFR distribution.png", 
                 plot = egfr_plot, width = 15, height = 10, dpi = 300)
 
@@ -620,6 +620,7 @@ openxlsx::write.xlsx(table_2y,
                      file = "Reclassification 2-year predictions.xlsx")
 openxlsx::write.xlsx(table_5y,
                      file = "Reclassification 5-year predictions.xlsx")
+
 
 
 
