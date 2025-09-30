@@ -278,7 +278,7 @@ plot_KFRE_2y <- ggplot2::ggplot(cohort_risk_2y_long,
 
 # 0-0.5% Create density ridge plot
 plot_KFRE_zoomed_00.5_2y <- ggplot2::ggplot(cohort_risk_2y_long, 
-                                            aes(x = Risk,
+                                            ggplot2::aes(x = Risk,
                                                 y = Equation, 
                                                 fill = stat(x))) +
   ggridges::geom_density_ridges_gradient(scale = 0.9, 
@@ -294,9 +294,9 @@ plot_KFRE_zoomed_00.5_2y <- ggplot2::ggplot(cohort_risk_2y_long,
                 x = "Risk Score", y = "Equation") +
   ggplot2::theme_minimal(base_size = 12) +  
   ggplot2::theme(
-    plot.background = ggplot2::element_rect(fill = alpha("white", 0.8), 
+    plot.background = ggplot2::element_rect(fill = ggplot2::alpha("white", 0.8), 
                                             color = NA), 
-    panel.background = ggplot2::element_rect(fill = alpha("white", 0.8), 
+    panel.background = ggplot2::element_rect(fill = ggplot2::alpha("white", 0.8), 
                                              color = NA),
     legend.title = ggplot2::element_text(size = 8), 
     legend.text = ggplot2::element_text(size = 6),
@@ -355,7 +355,7 @@ cohort_risk_5y_long <- cohort |>
                                          "risk_5y_ckd_epi_2021_cr_cys" = "CKD-EPIcrcys 2021"))
 
 # 0-100% density ridge plot
-plot_KFRE_5y <- ggplot2::ggplot(cohort_risk_5y_long, aes(x = Risk, 
+plot_KFRE_5y <- ggplot2::ggplot(cohort_risk_5y_long, ggplot2::aes(x = Risk, 
                                                          y = Equation, 
                                                          fill = stat(x))) +
   ggridges::geom_density_ridges_gradient(scale = 1, 
@@ -373,7 +373,7 @@ plot_KFRE_5y <- ggplot2::ggplot(cohort_risk_5y_long, aes(x = Risk,
                  axis.text.y = ggplot2::element_text(size = 10))
 
 # 0-1% Create density ridge plot
-plot_KFRE_zoomed_01_5y <- ggplot2::ggplot(cohort_risk_5y_long, aes(x = Risk, 
+plot_KFRE_zoomed_01_5y <- ggplot2::ggplot(cohort_risk_5y_long, ggplot2::aes(x = Risk, 
                                                                    y = Equation, 
                                                                    fill = stat(x))) +
   ggridges::geom_density_ridges_gradient(scale = 0.9, 
@@ -389,8 +389,8 @@ plot_KFRE_zoomed_01_5y <- ggplot2::ggplot(cohort_risk_5y_long, aes(x = Risk,
                 x = "Risk Score", y = "Equation") +
   ggplot2::theme_minimal(base_size = 12) +  
   ggplot2::theme(
-    plot.background = ggplot2::element_rect(fill = alpha("white", 0.8), color = NA), 
-    panel.background = ggplot2::element_rect(fill = alpha("white", 0.8), color = NA),
+    plot.background = ggplot2::element_rect(fill = ggplot2::alpha("white", 0.8), color = NA), 
+    panel.background = ggplot2::element_rect(fill = ggplot2::alpha("white", 0.8), color = NA),
     legend.title = ggplot2::element_text(size = 8),  
     legend.text = ggplot2::element_text(size = 6),   
     legend.key.size = ggplot2::unit(0.5, "lines"),   
@@ -522,7 +522,7 @@ cohort_egfr_long <- cohort |>
 
 # create plot
 egfr_plot <- ggplot2::ggplot(cohort_egfr_long, 
-                             aes(x = eGFR, 
+                             ggplot2::aes(x = eGFR, 
                                  y = Equation, 
                                  fill = stat(x))) +
   ggridges::geom_density_ridges_gradient(scale = 0.9, 
@@ -620,4 +620,5 @@ openxlsx::write.xlsx(table_2y,
                      file = "Reclassification 2-year predictions.xlsx")
 openxlsx::write.xlsx(table_5y,
                      file = "Reclassification 5-year predictions.xlsx")
+
 
