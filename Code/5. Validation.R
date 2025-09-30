@@ -212,7 +212,7 @@ for (horizon in horizons){
     ggplot2::theme(
       legend.text = ggplot2::element_text(size = 8), 
       legend.title = ggplot2::element_text(size = 9),
-      legend.key.size = unit(0.5, "cm"))
+      legend.key.size = ggplot2::unit(0.5, "cm"))
   
   assign(paste0("combined_cal_plot_", horizon), combined_cal_plot)
 }
@@ -273,7 +273,7 @@ plot_KFRE_2y <- ggplot2::ggplot(cohort_risk_2y_long,
   ggplot2::labs(title = "2-year KFRE risk 0-100%",
                 x = "Predicted risk", y = "Equation") +
   ggplot2::theme_minimal(base_size = 12) +  
-  ggplot2::theme(panel.spacing = unit(0.5, "lines"), 
+  ggplot2::theme(panel.spacing = ggplot2::unit(0.5, "lines"), 
                  axis.text.y = ggplot2::element_text(size = 10))
 
 # 0-0.5% Create density ridge plot
@@ -300,8 +300,8 @@ plot_KFRE_zoomed_00.5_2y <- ggplot2::ggplot(cohort_risk_2y_long,
                                              color = NA),
     legend.title = ggplot2::element_text(size = 8), 
     legend.text = ggplot2::element_text(size = 6),
-    legend.key.size = unit(0.5, "lines"),
-    panel.spacing = unit(0.5, "lines"), 
+    legend.key.size = ggplot2::unit(0.5, "lines"),
+    panel.spacing = ggplot2::unit(0.5, "lines"), 
     axis.text.y = ggplot2::element_text(size = 10), 
     axis.text.x = ggplot2::element_text(size = 8),  
     axis.title.x = ggplot2::element_text(size = 8), 
@@ -369,7 +369,7 @@ plot_KFRE_5y <- ggplot2::ggplot(cohort_risk_5y_long, aes(x = Risk,
   ggplot2::labs(title = "5-year KFRE risk 0-100%",
                 x = "Risk Score", y = "Equation") +
   ggplot2::theme_minimal(base_size = 12) +  
-  ggplot2::theme(panel.spacing = unit(0.5, "lines"), 
+  ggplot2::theme(panel.spacing = ggplot2::unit(0.5, "lines"), 
                  axis.text.y = ggplot2::element_text(size = 10))
 
 # 0-1% Create density ridge plot
@@ -393,8 +393,8 @@ plot_KFRE_zoomed_01_5y <- ggplot2::ggplot(cohort_risk_5y_long, aes(x = Risk,
     panel.background = ggplot2::element_rect(fill = alpha("white", 0.8), color = NA),
     legend.title = ggplot2::element_text(size = 8),  
     legend.text = ggplot2::element_text(size = 6),   
-    legend.key.size = unit(0.5, "lines"),   
-    panel.spacing = unit(0.5, "lines"), 
+    legend.key.size = ggplot2::unit(0.5, "lines"),   
+    panel.spacing = ggplot2::unit(0.5, "lines"), 
     axis.text.y = ggplot2::element_text(size = 10),  
     axis.text.x = ggplot2::element_text(size = 8),   
     axis.title.x = ggplot2::element_text(size = 8),  
@@ -457,7 +457,7 @@ plot_KFRE_diff_2y <- ggplot2::ggplot(cohort_risk_diff_2y_long,
                 x = "Risk difference (Risk equation - Risk CKD-EPIcr 2009)", 
                 y = "Equation") +
   ggplot2::theme_minimal(base_size = 12) +  
-  ggplot2::theme(panel.spacing = unit(0.5, "lines"), 
+  ggplot2::theme(panel.spacing = ggplot2::unit(0.5, "lines"), 
                  axis.text.y = ggplot2::element_text(size = 10))
 
 ### 5-year KFRE
@@ -489,7 +489,7 @@ plot_KFRE_diff_5y <- ggplot2::ggplot(cohort_risk_diff_5y_long,
                 x = "Risk Difference (Risk Equation - Risk CKD-EPIcr 2009)", 
                 y = "Equation") +
   ggplot2::theme_minimal(base_size = 12) +  
-  ggplot2::theme(panel.spacing = unit(0.5, "lines"), 
+  ggplot2::theme(panel.spacing = ggplot2::unit(0.5, "lines"), 
                  axis.text.y = ggplot2::element_text(size = 10))
 
 # combine plots
@@ -535,7 +535,7 @@ egfr_plot <- ggplot2::ggplot(cohort_egfr_long,
   ggplot2::labs(title = "eGFR distributions",
                 x = "eGFR (mL/min/1.73m²)", y = "Equation") +
   ggplot2::theme_minimal(base_size = 12) +  
-  ggplot2::theme(panel.spacing = unit(1.5, "lines"), 
+  ggplot2::theme(panel.spacing = ggplot2::unit(1.5, "lines"), 
                  axis.text.y = ggplot2::element_text(size = 10)) +
   ggplot2::theme(plot.margin = margin(20, 10, 20, 10)) # Expands top/bottom margins
 ggplot2::ggsave(filename = "eGFR distribution.png", 
@@ -620,3 +620,4 @@ openxlsx::write.xlsx(table_2y,
                      file = "Reclassification 2-year predictions.xlsx")
 openxlsx::write.xlsx(table_5y,
                      file = "Reclassification 5-year predictions.xlsx")
+
