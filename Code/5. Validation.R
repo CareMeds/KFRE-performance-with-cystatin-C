@@ -403,7 +403,7 @@ plot_KFRE_zoomed_01_5y <- ggplot2::ggplot(cohort_risk_5y_long, ggplot2::aes(x = 
 
 # Combine plots
 plot_KFRE_combined_5y <- plot_KFRE_5y + 
-  ggplot2::annotation_custom(ggplotGrob(plot_KFRE_zoomed_01_5y), 
+  ggplot2::annotation_custom(ggplot2::ggplotGrob(plot_KFRE_zoomed_01_5y), 
                              xmin = 0.4, xmax = 1.05, # Horizontal placement of the zoomed plot
                              ymin = 3, ymax = 6) + 
   ggplot2::theme_classic() +
@@ -620,5 +620,6 @@ openxlsx::write.xlsx(table_2y,
                      file = "Reclassification 2-year predictions.xlsx")
 openxlsx::write.xlsx(table_5y,
                      file = "Reclassification 5-year predictions.xlsx")
+
 
 
