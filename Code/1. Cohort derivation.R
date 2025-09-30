@@ -28,7 +28,7 @@ source("~/Code/Functions eGFR equations.R")
 ### Initial inclusion ##########################################################
 ################################################################################
 
-# include patients with outpatient Cystatin C after 2010
+# include patients with outpatient Cystatin C after 2011
 cystatinc <- lab_values |> 
   dplyr::filter(test == "cystC") |>  
   dplyr::filter(ip == 0) |>
@@ -242,4 +242,5 @@ cohort <- cohort |>
 sum(cohort$new_rrt == 1, na.rm = TRUE) 
 
 # save final cohort
+
 save(cohort, file = "cohort.RData")
