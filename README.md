@@ -25,7 +25,7 @@ Finally, we define:
 
 In this file, we define key covariates as follows:
 1.	Record the date of emigration.
-2.	Calculate eGFR using the five equations as defined in Functions eGFR equations.R.
+2.	Calculate eGFR using the five equations as defined in **Functions eGFR equations.R**.
 3.	Define comorbidities based on primary care, outpatient, and hospital records, applying an unlimited look-back period except for cancer, which uses a one-year look-back.
 4.	Retrieve medication use within the past six months.
 
