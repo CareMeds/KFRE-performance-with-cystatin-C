@@ -18,21 +18,8 @@ load("~/Data/cohort_predictions.RData")
 source("~/Code/Functions for analyses.R")
 
 # load libraries
-library(openxlsx)       # save to excel
-library(riskRegression) # evalution metrics
-library(Hmisc)          # C-index
 library(survival)       # time-to-event analyses
-library(cmprsk)         # competing risk
-library(boot)           # bootstrapping
-library(dplyr)          # data manipulation
-library(tidyr)          # data manipulation
-library(knitr)          # pretty tables
-library(kableExtra)     # pretty tables
-library(ggplot2)        # generate plots
-library(ggthemes)       # themes of plots
-library(ggridges)       # gradient distribution
 library(patchwork)      # combine plots
-library(cowplot)        # combine plots
 
 ################################################################################
 ### For each equation, calculate performance measures ##########################
@@ -620,6 +607,7 @@ openxlsx::write.xlsx(table_2y,
                      file = "Reclassification 2-year predictions.xlsx")
 openxlsx::write.xlsx(table_5y,
                      file = "Reclassification 5-year predictions.xlsx")
+
 
 
 
