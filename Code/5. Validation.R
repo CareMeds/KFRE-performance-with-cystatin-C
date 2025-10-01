@@ -422,7 +422,7 @@ plot_KFRE_combined_5y <- plot_KFRE_5y +
 # combine plots for 2 and 5 years prediction horizon
 combined_dist_plot <- plot_KFRE_combined_2y + plot_KFRE_combined_5y + 
   plot_layout(ncol = 1, guides = "collect")
-combined_dist_plot & theme(legend.position = "bottom")
+combined_dist_plot & ggplot2::theme(legend.position = "bottom")
 ggplot2::ggsave(filename = "Combined distribution plots.png", 
                 plot = combined_dist_plot, width = 15, height = 10, dpi = 300)
 
@@ -495,7 +495,7 @@ plot_KFRE_diff_5y <- ggplot2::ggplot(cohort_risk_diff_5y_long,
 # combine plots
 combined_plot_diff <- plot_KFRE_diff_2y + plot_KFRE_diff_5y + 
   plot_layout(ncol = 1, guides = "collect")
-combined_plot_diff & theme(legend.position = "bottom")
+combined_plot_diff & ggplot2::theme(legend.position = "bottom")
 ggplot2::ggsave(filename = "Combined risk difference.png", 
                 plot = combined_plot_diff, width = 15, height = 10, dpi = 300)
 
@@ -620,6 +620,7 @@ openxlsx::write.xlsx(table_2y,
                      file = "Reclassification 2-year predictions.xlsx")
 openxlsx::write.xlsx(table_5y,
                      file = "Reclassification 5-year predictions.xlsx")
+
 
 
 
