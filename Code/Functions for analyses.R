@@ -33,7 +33,6 @@ c_statistic <- function(
   PI, # prognostic index
   data, # cohort data
   horizon, # time horizon
-  bootstrap = FALSE, # to calculate CIs
   B = 500,
   seed = 123
 ) {
@@ -55,7 +54,7 @@ c_statistic <- function(
   )
 
   # Add bootstrapping if requested
-  if (bootstrap) {
+  if (B > 0) {
     # Define bootstrap function
     boot_func <- function(data, indices, risk_var) {
       # Create resampled dataset
@@ -102,7 +101,6 @@ oe_ratio <- function(
   pred_risks,
   CIF,
   horizon,
-  bootstrap = FALSE,
   B = 500,
   seed = 123
 ) {
@@ -117,7 +115,7 @@ oe_ratio <- function(
   )
 
   # Add bootstrapping if requested
-  if (bootstrap) {
+  if (B > 0) {
     # Define bootstrap function
     boot_func <- function(data, indices, pred_risks, cif_obj, time_horizon) {
       # Resample risk predictions
@@ -219,6 +217,7 @@ cal_int_slope <- function(pred_risks, data, horizon) {
   Intercept_SE <- summary(fit_cal_int)$mean$san.se
   
   # fit model for calibration slope
+  # offset(cll_pred) centers the slope to zero, therefore later we need to add one
   fit_cal_slope <- geepack::geese(
     pseudovalue ~ offset(cll_pred) + cll_pred,
     data = pseudos,
@@ -233,6 +232,7 @@ cal_int_slope <- function(pred_risks, data, horizon) {
   Slope_SE <- summary(fit_cal_slope)$mean["cll_pred", ]$san.se
   
   return(list(
+    pseudos = pseudos,
     Intercept = Intercept,
     Intercept_CI = c(Intercept - qnorm(0.975) * Intercept_SE,
                      Intercept + qnorm(0.975) * Intercept_SE),
@@ -247,7 +247,6 @@ brier_scores <- function(
   pred_risks,
   data,
   horizon,
-  bootstrap = FALSE,
   B = 500,
   seed = 123
 ) {
@@ -265,7 +264,7 @@ brier_scores <- function(
     data = data,
     times = horizon * 365.25,
     outcome = 1,
-    conf.int = TRUE,
+    conf.int = FALSE,
     metrics = "brier",
     summary = "ipa"
   )
@@ -284,7 +283,7 @@ brier_scores <- function(
   )
 
   # Add bootstrapping if requested
-  if (bootstrap) {
+  if (B > 0) {
     # Define bootstrap function
     boot_func <- function(data, indices, risk_var) {
       resampled_data <- data[indices, ]
@@ -295,7 +294,7 @@ brier_scores <- function(
         formula = Hist(time_to_event, outcome) ~ 1,
         cens.method = "pseudo",
         data = resampled_data,
-        conf.int = TRUE,
+        conf.int = FALSE,
         times = horizon * 365.25,
         outcome = 1,
         metrics = "brier",

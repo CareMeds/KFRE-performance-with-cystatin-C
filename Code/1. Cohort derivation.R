@@ -42,7 +42,7 @@ cystatinc_2011 <- cystatinc |>
 ### Creatinine and Cystatin C measurements #####################################
 ################################################################################
 
-# collect creatinine values
+# collect outpatient creatinine
 creatinine <- lab_values |>  
   dplyr::filter(test == "crea") |> 
   dplyr::mutate(datum = as.Date(datum, format = "%Y-%m-%d")) |> 
@@ -242,7 +242,4 @@ cohort <- cohort |>
 sum(cohort$new_rrt == 1, na.rm = TRUE) 
 
 # save final cohort
-
 save(cohort, file = "cohort.RData")
-
-
