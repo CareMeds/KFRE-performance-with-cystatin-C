@@ -1187,7 +1187,8 @@ colnames(td_AUC)[1] <- "Equation"
 parse_ci <- function(x) {
   x <- gsub("\\[|\\]", "", x)
   parts <- strsplit(x, ";\\s*")
-  data.frame(lo = as.numeric(sapply(parts, `[`, 1)), hi = as.numeric(sapply(parts, `[`, 2)))
+  data.frame(lo = as.numeric(sapply(parts, `[`, 1)), 
+             hi = as.numeric(sapply(parts, `[`, 2)))
 }
 
 ci_2y <- parse_ci(td_AUC$AUC_2y_CI)
@@ -1262,7 +1263,7 @@ AUC_plot <- ggplot2::ggplot(td_AUC_long, ggplot2::aes(
       xmax = Inf
     ),
     inherit.aes = FALSE,
-    fill  = "grey",
+    fill  = "lightgrey",
     color = NA
   ) +
   
