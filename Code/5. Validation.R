@@ -9,13 +9,13 @@ rm(list = ls(all.names = TRUE))
 set.seed(27)
 
 # set directory to save results
-setwd("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Results new/")
+setwd("~/Results new/")
 
 # load data sets
-load("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Data/cohort_predictions.RData")
+load("~/Data/cohort_predictions.RData")
 
 # load functions
-source("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Code/Functions for analyses.R")
+source("~/Code/Functions for analyses.R")
 
 # load libraries
 library(survival)       # time-to-event analyses

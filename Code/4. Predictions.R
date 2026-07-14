@@ -121,5 +121,26 @@ cohort <- cohort |>
                 risk_5y_ckd_epi_2012_cr_cys = mapply(KFRE_risk_5y, PI_ckd_epi_2012_cr_cys), 
                 risk_5y_ckd_epi_2021_cr_cys = mapply(KFRE_risk_5y, PI_ckd_epi_2021_cr_cys))
 
+################################################################################
+### Reverse Kaplan-Meier
+################################################################################
+stats::quantile(prodlim::prodlim(prodlim::Hist(time_to_event_5y, 
+                                               outcome_5y)~1, 
+                                 data=cohort, 
+                                 reverse=TRUE))
+
+# Aalen-Johanssen
+plot(survfit(Surv(time_to_event_5y,
+                  as.factor(outcome_5y)) ~ 1,
+             data = cohort))
+# Kaplan-Meier
+plot(survfit(Surv(time_to_event_5y,
+                  outcome_5y == 1) ~ 1,
+        data = cohort))
+# Reverse Kaplan-Meier
+plot(survfit(Surv(time_to_event_5y,
+                  outcome_5y == 0) ~ 1,
+             data = cohort))
+
 # save cohort with predicted probabilities
 save(cohort, cin_2y, cin_5y, file = "cohort_predictions.RData")
