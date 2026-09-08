@@ -9,7 +9,7 @@ rm(list=ls(all.names=TRUE))
 set.seed(27)
 
 # set directory to load and save data
-setwd("~/Data/")
+setwd("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Data/")
 
 # load data
 load("albuminuria_lab_test_clean.Rda")
@@ -22,7 +22,7 @@ load("rrt.Rda")
 library(dplyr)          # data manipulation
 
 # load functions
-source("~/Code/Functions eGFR equations.R")
+source("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Code/Functions eGFR equations.R")
 
 ################################################################################
 ### Initial inclusion ##########################################################
@@ -242,4 +242,4 @@ cohort <- cohort |>
 sum(cohort$new_rrt == 1, na.rm = TRUE) 
 
 # save final cohort
-save(cohort, file = "cohort.RData")
+save(cohort, file = "P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Data/cohort.RData")

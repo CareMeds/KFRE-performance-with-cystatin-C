@@ -9,7 +9,7 @@ rm(list=ls(all.names=TRUE))
 set.seed(27)
 
 # set directory to load and save data
-setwd("~/Data/")
+setwd("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Data/")
 
 # load data sets
 load("cohort_outcomes.RData")
@@ -19,7 +19,7 @@ library(cmprsk)         # competing risk
 library(dplyr)          # data manipulation
 
 # load functions
-source("~/Code/Functions for analyses.R")
+source("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Code/Functions for analyses.R")
 
 ################################################################################
 ### Describe outcome rates #####################################################

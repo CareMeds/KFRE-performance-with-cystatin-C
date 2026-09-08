@@ -9,21 +9,21 @@ rm(list=ls(all.names=TRUE))
 set.seed(27)
 
 # set directory to load and save data
-setwd("~/Data/")
+setwd("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/")
 
 # Load data sets
-load("cohort.Rdata")
-load("emigration.Rda")    # emigration
-load("diagnoses_kon.Rda") # primary care
-load("diagnoses_ovr.Rda") # specialist care
-load("diagnoses_slv.Rda") # hospitalizations
-load("medication.Rda")    # medications
+load("Data/cohort.Rdata")
+load("Data/emigration.Rda")    # emigration
+load("Data/diagnoses_kon.Rda") # primary care
+load("Data/diagnoses_ovr.Rda") # specialist care
+load("Data/diagnoses_slv.Rda") # hospitalizations
+load("Data/medication.Rda")    # medications
 
 # load libraries
 library(dplyr)          # data manipulation
 
 # load functions
-source("~/Code/Functions eGFR equations.R")
+source("Code/Functions eGFR equations.R")
 
 ################################################################################
 ### Obtain emigration data #####################################################
@@ -199,6 +199,7 @@ medication_per_ID <- medication_index_dt |>
 # Obtain medications
 medications_index <- data.frame(names=c("bblock",
                                       "hypoglycemic",
+                                      "sgtl2i",
                                       "ccb",
                                       "diur",
                                       "rasi",
@@ -206,6 +207,7 @@ medications_index <- data.frame(names=c("bblock",
                                       "nsaid"),
                               ATC=c("^C07",  # beta blockers
                                     "^A10",  # hypoglycemic agents
+                                    "^A10BK",  # SGLT2i
                                     "^C08",  # calcium channel blockers
                                     "^C03",  # diuretics
                                     "^C09A|^C09B|^C09C|^C09D", # RASi
@@ -230,4 +232,4 @@ for (ATC_index in 1:length(medications_index$names)){
 colMeans(cohort[17:ncol(cohort)])*100
 
 # save updated cohort dataframe
-save(cohort, file = "cohort_covariates.Rdata")
+save(cohort, file = "Data/cohort_covariates.Rdata")

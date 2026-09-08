@@ -9,7 +9,7 @@ rm(list=ls(all.names=TRUE))
 set.seed(27)
 
 # set directory to load and save data
-setwd("~/Data/")
+setwd("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Data/")
 
 # load data sets
 load("cohort_covariates.RData")
@@ -18,45 +18,44 @@ load("cohort_covariates.RData")
 library(dplyr)          # data manipulation
 
 ################################################################################
-### Create time-to-event outcome for 2 and 5 years #############################
+### Create time-to-event outcomes for each horizon ############################
 ################################################################################
-cohort <- cohort |> 
-  dplyr::mutate(
-    # define two years in the future from index date
-    end_follow_up_2y = as.Date(index_dt + 365.25 * 2),
-    
-    # define date at which event occurs 
-    date_2y = pmin(as.Date(rrt_date),         # outcome of interest
-                   as.Date(death_date),       # competing event
-                   as.Date("2021-12-31"),     # censoring
-                   as.Date(date_emigration),  # censoring 
-                   as.Date(end_follow_up_2y), na.rm = TRUE), # censoring
-    
-    # create a time-to-event variable
-    time_to_event_2y =  as.numeric(date_2y - index_dt),
-    
-    # create indicator variable for event
-    outcome_2y = dplyr::case_when(date_2y == rrt_date ~ 1,   # outcome of interest
-                           date_2y == death_date ~ 2, # competing event
-                           TRUE ~ 0),              # censoring
-    
-    # define five years in the future from index date
-    end_follow_up_5y = as.Date(index_dt + 365.25 * 5),
-    
-    # define date at which event occurs
-    date_5y = pmin(as.Date(rrt_date), 
-                   as.Date(death_date), 
-                   as.Date("2021-12-31"), 
-                   as.Date(date_emigration), 
-                   as.Date(end_follow_up_5y), na.rm = TRUE),
-    
-    # create a time-to-event variable
-    time_to_event_5y =  as.numeric(date_5y - index_dt),
-    
-    # create indicator variable for event
-    outcome_5y = dplyr::case_when(date_5y == rrt_date ~ 1,   # outcome of interest
-                           date_5y == death_date ~ 2, # competing event
-                           TRUE ~ 0))                 # censoring
+# named list of horizons (in years) to derive outcomes for. Inf = no horizon
+# cap at all -- follow-up runs to the earliest of event/death/admin-censoring/
+# emigration only. Useful for time-dependent AUC at a horizon t0 close to a
+# capped end_follow_up, where truncating time-to-event exactly at t0 can tie
+# the risk set and make it impossible to have any subject with T > t0.
+horizons <- list("2y" = 2, "5y" = 5, "inf" = Inf)
+
+for (suffix in names(horizons)) {
+  horizon_years <- horizons[[suffix]]
+  
+  # date at which event occurs: earliest of outcome of interest, competing
+  # event, or the censoring dates -- with the horizon cap included only when
+  # horizon_years is finite
+  censoring_dates <- list(
+    as.Date(cohort$rrt_date),         # outcome of interest
+    as.Date(cohort$death_date),       # competing event
+    as.Date("2021-12-31"),            # censoring
+    as.Date(cohort$date_emigration)   # censoring
+  )
+  if (is.finite(horizon_years)) {
+    end_follow_up <- as.Date(cohort$index_dt + 365.25 * horizon_years)
+    cohort[[paste0("end_follow_up_", suffix)]] <- end_follow_up
+    censoring_dates <- c(censoring_dates, list(end_follow_up)) # censoring
+  }
+  date_event <- do.call(pmin, c(censoring_dates, na.rm = TRUE))
+  
+  # create a time-to-event variable
+  cohort[[paste0("time_to_event_", suffix)]] <- as.numeric(date_event - cohort$index_dt)
+  
+  # create indicator variable for event
+  cohort[[paste0("outcome_", suffix)]] <- dplyr::case_when(
+    date_event == cohort$rrt_date ~ 1,   # outcome of interest
+    date_event == cohort$death_date ~ 2, # competing event
+    TRUE ~ 0                             # censoring
+  )
+}
 
 # save cohort with outcomes
 save(cohort, file = "cohort_outcomes.RData")

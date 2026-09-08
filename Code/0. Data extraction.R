@@ -9,7 +9,7 @@ rm(list=ls(all.names=TRUE))
 set.seed(27)
 
 # set directory to load and save data
-setwd("~/Data/")
+setwd("P:/SCREAM2/SCREAM2_Research/Malou Magnani/Final/Data/")
 
 # load libraries
 library(DBI)       # database connection
