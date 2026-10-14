@@ -51,11 +51,11 @@ equations <- c(
 )
 
 model_names <- c(
-  "CKD-EPIcr 2009",
-  "CKD-EPIcr 2021",
-  "CKD-EPIcys 2012",
-  "CKD-EPIcrcys 2012",
-  "CKD-EPIcrcys 2021"
+  "eGFRcr 2009",
+  "eGFRcr 2021",
+  "eGFRcys 2012",
+  "eGFRcrcys 2012",
+  "eGFRcrcys 2021"
 )
 
 colors_palette <- c("darkorange4",
@@ -66,7 +66,7 @@ colors_palette <- c("darkorange4",
 
 n_bootstraps <- 500
 
-# 95th percentile of 5-year predicted risk (CKD-EPIcr 2009), used to set
+# 95th percentile of 5-year predicted risk (eGFRcr 2009), used to set
 # shared, "trimmed" axis limits across several plots.
 max_5y <- quantile(cohort$risk_5y_ckd_epi_2009_cr, 0.95, na.rm = TRUE)
 
@@ -122,7 +122,7 @@ run_dca(
   model_names = model_names,
   colors_palette = colors_palette,
   max_5y = max_5y,
-  new_DCA_run = FALSE,
+  new_DCA_run = TRUE,
   cache_file = file.path(data_dir, "analyses/dca.Rda"),
   plot_file = file.path(results_dir, "Combined DCA plot.png"),
   table_file = file.path(results_dir, "Net Benefit Table.xlsx")
@@ -156,7 +156,7 @@ plot_risk_distributions(
 plot_risk_differences(
   risk_2y_long,
   risk_5y_long,
-  reference_label = "CKD-EPIcr 2009",
+  reference_label = "eGFRcr 2009",
   out_file = file.path(results_dir, "Combined risk difference.png")
 )
 
@@ -206,7 +206,16 @@ run_sensitivity_egfr_subgroup(
   equations = equations,
   model_names = model_names,
   out_file = file.path(results_dir, "SA_eGFR_subgroup.xlsx"),
-  B = n_bootstraps
+  B = n_bootstraps,
+  # TRUE = tables (incl. bootstrap) + figures; FALSE = figures only (fast,
+  # leaves the existing Excel files untouched)
+  run_tables = TRUE,
+  # calibration plots (+ histograms) for the 3 subgroups, via
+  # plot_calibration_curves(); one stacked figure per comparator (untrimmed + trimmed)
+  colors_palette = colors_palette,
+  max_5y = max_5y,
+  cal_file_full = file.path(results_dir, "SA_eGFR_subgroup_calibration.png"),
+  cal_file_trimmed = file.path(results_dir, "SA_eGFR_subgroup_calibration_trimmed.png")
 )
 
 ################################################################################

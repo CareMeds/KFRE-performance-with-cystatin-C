@@ -869,14 +869,17 @@ compute_performance_measures <- function(cohort,
 ## ---- Step: calibration plots (+ risk histogram insets) ---------------------
 
 ## Predicted-risk histogram for one horizon/trim combination, for a single
-## equation (used as an inset under the combined calibration plot).
+## equation (used as an inset under the combined calibration plot). `equation`
+## is the column-name suffix of the equation to plot (default: the primary
+## analysis' reference equation, CKD-EPIcr 2009); pass `color`/`xlab` to match.
 build_risk_histogram <- function(cohort,
                                  horizon,
                                  trim,
                                  max_5y,
                                  color = "darkorange4",
-                                 xlab = "CKD-EPIcr 2009") {
-  var <- paste0("risk_", horizon, "y_ckd_epi_2009_cr")
+                                 xlab = "CKD-EPIcr 2009",
+                                 equation = "ckd_epi_2009_cr") {
+  var <- paste0("risk_", horizon, "y_", equation)
   # narrower bins for the trimmed (zoomed-in) view, since it covers a much
   # smaller x-axis range and needs finer resolution to still look like a
   # histogram rather than 1-2 wide bars. Untrimmed binwidth is the same for
@@ -909,33 +912,49 @@ build_risk_histogram <- function(cohort,
       axis.title = ggplot2::element_text(size = 14)
     )
   
-  if (trim) {
-    # zoom the x-axis to the 95th percentile of 5-year risk (`max_5y`),
-    # so the trimmed view isn't dominated by a long tail of high-risk outliers
-    hist <- hist + ggplot2::coord_cartesian(xlim = c(0, max_5y))
-  }
+  # ALWAYS set the x-limits, so the histogram's x-axis matches the
+  # calibration panel directly above it (patchwork aligns panels, but only
+  # shows the same range if both plots use the same limits):
+  #   trimmed   -> 0 to the 95th percentile of 5-year risk (`max_5y`), so the
+  #                view isn't dominated by a long tail of high-risk outliers
+  #   untrimmed -> full 0-1 risk scale
+  # coord_cartesian() zooms visually without dropping data, so counts stay correct.
+  hist <- hist + ggplot2::coord_cartesian(xlim = c(0, if (trim) max_5y else 1))
   
   return(hist)
 }
 
 ## Combined calibration plot (all equations, one panel) for both horizons,
 ## trimmed and untrimmed, with a predicted-risk histogram strip underneath.
-## Writes both PNGs.
+## Writes both PNGs and invisibly returns list(full = , trimmed = ) with the
+## two assembled patchwork figures.
+##
+## Optional arguments (defaults reproduce the primary analysis exactly), used
+## when this is called on a subset of `cohort` (e.g. an eGFR-discordance
+## subgroup): `hist_equation`/`hist_label`/`hist_color` = which equation's
+## predicted-risk histogram to show (default CKD-EPIcr 2009), and `subtitle` =
+## extra first line in each calibration panel title (e.g. subgroup name + N).
+## If `file_full` / `file_trimmed` are NULL that figure is not saved, only
+## returned (so callers can combine several figures into one).
 plot_calibration_curves <- function(cohort,
                                     horizons,
                                     equations,
                                     model_names,
                                     colors_palette,
                                     max_5y,
-                                    file_full,
-                                    file_trimmed) {
+                                    file_full = NULL,
+                                    file_trimmed = NULL,
+                                    hist_equation = "ckd_epi_2009_cr",
+                                    hist_label = "CKD-EPIcr 2009",
+                                    hist_color = "darkorange4",
+                                    subtitle = NULL) {
   # the 4 histogram insets (2y/5y x trimmed/untrimmed) for the reference
   # equation (CKD-EPIcr 2009), stacked underneath the calibration curves below
   histogram_risk <- list(
-    risk_2y_ckd_epi_2009_cr = build_risk_histogram(cohort, 2, FALSE, max_5y),
-    risk_2y_ckd_epi_2009_cr_trimmed = build_risk_histogram(cohort, 2, TRUE, max_5y),
-    risk_5y_ckd_epi_2009_cr = build_risk_histogram(cohort, 5, FALSE, max_5y),
-    risk_5y_ckd_epi_2009_cr_trimmed = build_risk_histogram(cohort, 5, TRUE, max_5y)
+    risk_2y_ckd_epi_2009_cr = build_risk_histogram(cohort, 2, FALSE, max_5y, hist_color, hist_label, hist_equation),
+    risk_2y_ckd_epi_2009_cr_trimmed = build_risk_histogram(cohort, 2, TRUE, max_5y, hist_color, hist_label, hist_equation),
+    risk_5y_ckd_epi_2009_cr = build_risk_histogram(cohort, 5, FALSE, max_5y, hist_color, hist_label, hist_equation),
+    risk_5y_ckd_epi_2009_cr_trimmed = build_risk_histogram(cohort, 5, TRUE, max_5y, hist_color, hist_label, hist_equation)
   )
   
   # predicted risk for every equation, one list per horizon, in `equations` order
@@ -998,7 +1017,7 @@ plot_calibration_curves <- function(cohort,
         ggplot2::geom_line(linewidth = 0.75, alpha = 0.8) +
         ggplot2::scale_color_manual(values = colors_palette, breaks = model_names) +
         ggplot2::labs(
-          title = paste0(horizon, "-year KFRE"),
+          title = paste0(if (!is.null(subtitle)) paste0(subtitle, "\n"), horizon, "-year KFRE"),
           x = "Predicted Risks",
           y = "Observed Risks"
         ) +
@@ -1047,8 +1066,10 @@ plot_calibration_curves <- function(cohort,
             linetype = "dashed",
             color = "gray40"
           ) +
-          ggplot2::coord_cartesian(xlim = c(0, max_5y),
-                                   ylim = c(0, max_5y))
+          # untrimmed = full 0-1 risk scale (was max_5y, which made the
+          # "untrimmed" plot identical to the trimmed one)
+          ggplot2::coord_cartesian(xlim = c(0, 1),
+                                   ylim = c(0, 1))
       }
       
       combined_cal_plots_by[[trim_key]][[as.character(horizon)]] <- combined_cal_plot
@@ -1063,13 +1084,16 @@ plot_calibration_curves <- function(cohort,
   combined_hist_plots <-
     histogram_risk$risk_2y_ckd_epi_2009_cr + histogram_risk$risk_5y_ckd_epi_2009_cr
   
-  ggplot2::ggsave(
-    filename = file_full,
-    plot = (combined_cal_plots / combined_hist_plots) + patchwork::plot_layout(heights = c(3, 1)),
-    width = 9,
-    height = 6,
-    dpi = 300
-  )
+  fig_full <- (combined_cal_plots / combined_hist_plots) + patchwork::plot_layout(heights = c(3, 1))
+  if (!is.null(file_full)) {
+    ggplot2::ggsave(
+      filename = file_full,
+      plot = fig_full,
+      width = 9,
+      height = 6,
+      dpi = 300
+    )
+  }
   
   # --- Trimmed figure: same layout, using the trimmed/zoomed plots instead ---
   combined_cal_plots_trimmed <-
@@ -1079,15 +1103,18 @@ plot_calibration_curves <- function(cohort,
   combined_hist_plots_trimmed <-
     histogram_risk$risk_2y_ckd_epi_2009_cr_trimmed + histogram_risk$risk_5y_ckd_epi_2009_cr_trimmed
   
-  ggplot2::ggsave(
-    filename = file_trimmed,
-    plot = (combined_cal_plots_trimmed / combined_hist_plots_trimmed) + patchwork::plot_layout(heights = c(3, 1)),
-    width = 9,
-    height = 6,
-    dpi = 300
-  )
+  fig_trimmed <- (combined_cal_plots_trimmed / combined_hist_plots_trimmed) + patchwork::plot_layout(heights = c(3, 1))
+  if (!is.null(file_trimmed)) {
+    ggplot2::ggsave(
+      filename = file_trimmed,
+      plot = fig_trimmed,
+      width = 9,
+      height = 6,
+      dpi = 300
+    )
+  }
   
-  return(invisible(NULL))
+  return(invisible(list(full = fig_full, trimmed = fig_trimmed)))
 }
 
 ## ---- Step: discrimination forest plot ---------------------------------------
@@ -2378,6 +2405,13 @@ add_filename_suffix <- function(file, suffix) {
 ## "SA_eGFR_ckd_epi_2009_cr.xlsx", "SA_eGFR_ckd_epi_2021_cr.xlsx"). Returns
 ## a named list of each comparator's results data frame (invisibly), named
 ## by `cr_equations`.
+##
+## If `colors_palette`, `max_5y`, `cal_file_full` and `cal_file_trimmed` are
+## all supplied, calibration plots are also written for every subgroup (see
+## run_sensitivity_egfr_subgroup_one() below); otherwise only the Excel tables
+## are produced, as before. `run_tables = FALSE` skips the tables (and their
+## bootstrap) and only draws the figures -- fast, and leaves existing Excel
+## files untouched; the returned list's entries are then NULL.
 run_sensitivity_egfr_subgroup <- function(cohort,
                                           horizons,
                                           equations,
@@ -2385,7 +2419,12 @@ run_sensitivity_egfr_subgroup <- function(cohort,
                                           out_file,
                                           cr_equations = c("ckd_epi_2009_cr", "ckd_epi_2021_cr"),
                                           B = 500,
-                                          seed = 123) {
+                                          seed = 123,
+                                          colors_palette = NULL,
+                                          max_5y = NULL,
+                                          cal_file_full = NULL,
+                                          cal_file_trimmed = NULL,
+                                          run_tables = TRUE) {
   results_list <- list()
   
   for (cr_equation in cr_equations) {
@@ -2397,7 +2436,12 @@ run_sensitivity_egfr_subgroup <- function(cohort,
       cr_equation = cr_equation,
       out_file = add_filename_suffix(out_file, cr_equation),
       B = B,
-      seed = seed
+      seed = seed,
+      colors_palette = colors_palette,
+      max_5y = max_5y,
+      cal_file_full = cal_file_full,
+      cal_file_trimmed = cal_file_trimmed,
+      run_tables = run_tables
     )
   }
   
@@ -2416,7 +2460,18 @@ run_sensitivity_egfr_subgroup_one <- function(cohort,
                                               cr_equation,
                                               out_file,
                                               B = 500,
-                                              seed = 123) {
+                                              seed = 123,
+                                              colors_palette = NULL,
+                                              max_5y = NULL,
+                                              cal_file_full = NULL,
+                                              cal_file_trimmed = NULL,
+                                              run_tables = TRUE) {
+  make_plots <- !is.null(cal_file_full) && !is.null(cal_file_trimmed) &&
+    !is.null(colors_palette) && !is.null(max_5y)
+  if (!run_tables && !make_plots) {
+    stop("run_tables = FALSE needs colors_palette, max_5y, cal_file_full and cal_file_trimmed (nothing to do otherwise).")
+  }
+  
   # relative difference between the cystatin-C-based eGFR and this
   # creatinine-based comparator -- large positive/negative values flag
   # patients where the two markers disagree substantially
@@ -2445,7 +2500,77 @@ run_sensitivity_egfr_subgroup_one <- function(cohort,
   subgroups <- stats::setNames(lapply(eGFRsubgroup_labels, make_egfr_subgroup),
                                paste0("subgroup", seq_along(eGFRsubgroup_labels)))
   
-  run_sensitivity_core(cohort, horizons, equations, model_names, out_file, subgroups, B = B, seed = seed)
+  # tables (incl. the bootstrap, the slow part) can be skipped with
+  # run_tables = FALSE to re-draw only the figures
+  results <- NULL
+  if (run_tables) {
+    results <- run_sensitivity_core(cohort, horizons, equations, model_names, out_file, subgroups, B = B, seed = seed)
+  }
+  
+  # optional: calibration plots (+ predicted-risk histograms) for the subgroups,
+  # by re-using plot_calibration_curves() on each subgroup's own patients, with
+  # the same axis scales (`max_5y`) and styling as the primary analysis. The
+  # histograms show the comparator equation `cr_equation` that defines the
+  # subgroups. The per-subgroup figures are NOT saved individually: they are
+  # stacked (one block per subgroup: 2y + 5y calibration with histograms
+  # underneath) into ONE figure per comparator, saved untrimmed and trimmed as
+  # "<cal_file_*>" + "_<cr_equation>". Run AFTER the Excel file is written, so
+  # a plotting problem in a small subgroup can't lose the tables; a subgroup
+  # whose plot fails is skipped with a warning.
+  if (make_plots) {
+    cr_index <- match(cr_equation, equations)
+    figs <- list(full = list(), trimmed = list())
+    for (i in seq_along(eGFRsubgroup_labels)) {
+      sub_data <- cohort[which(cohort$eGFR_subgroup == eGFRsubgroup_labels[i]), ]
+      fig <- tryCatch(
+        plot_calibration_curves(
+          cohort = sub_data,
+          horizons = horizons,
+          equations = equations,
+          model_names = model_names,
+          colors_palette = colors_palette,
+          max_5y = max_5y,
+          hist_equation = cr_equation,
+          hist_label = model_names[cr_index],
+          hist_color = colors_palette[cr_index],
+          subtitle = paste0(eGFRsubgroup_labels[i], " (n = ", nrow(sub_data), ")")
+        ),
+        error = function(e) {
+          warning(
+            sprintf("Calibration plots skipped (%s, subgroup %d): %s",
+                    cr_equation, i, conditionMessage(e)),
+            call. = FALSE
+          )
+          NULL
+        }
+      )
+      if (!is.null(fig)) {
+        figs$full[[length(figs$full) + 1]] <- fig$full
+        figs$trimmed[[length(figs$trimmed) + 1]] <- fig$trimmed
+      }
+    }
+    
+    save_stacked <- function(fig_list, file) {
+      if (length(fig_list) == 0) return(invisible(NULL))
+      # each figure already has its own collected legend; keep only the last
+      # one so the stacked figure shows a single legend at the bottom
+      n <- length(fig_list)
+      for (k in seq_len(n - 1)) {
+        fig_list[[k]] <- fig_list[[k]] & ggplot2::theme(legend.position = "none")
+      }
+      ggplot2::ggsave(
+        filename = file,
+        plot = patchwork::wrap_plots(fig_list, ncol = 1),
+        width = 9,
+        height = 6 * n,
+        dpi = 300
+      )
+    }
+    save_stacked(figs$full, add_filename_suffix(cal_file_full, cr_equation))
+    save_stacked(figs$trimmed, add_filename_suffix(cal_file_trimmed, cr_equation))
+  }
+  
+  return(invisible(results))
 }
 
 ## Discrimination (AUC), calibration (intercept & slope), and Brier / scaled
